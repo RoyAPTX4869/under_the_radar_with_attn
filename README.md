@@ -1,5 +1,5 @@
 # HERO (Hybrid-Estimate Radar Odometry)
-*Modified from https://github.com/utiasASRL/hero_radar_odometry.git*
+*Modified from https://github.com/utiasASRL/hero_radar_odometry.git*  
 HERO (Hybrid-Estimate Radar Odometry) combines probabilistic state estimation and deep learned features. The network is trained in an unsupervised fashion. Deep learning is leveraged to process rich sensor data while classic state estimation is used to handle probabilities and out-of-distribution samples through outlier rejection schemes. To our knowledge, this is the first example of a totally unsupervised radar odometry pipeline. Our pipeline aproaches the performance of the current state of the art in point-based radar odometry, [Under the Radar](https://arxiv.org/abs/2001.10789), while being unsupervised.
 
 ## Updates
