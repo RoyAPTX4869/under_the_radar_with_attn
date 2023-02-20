@@ -31,6 +31,9 @@ class Keypoint(torch.nn.Module):
             keypoint_desc (torch.tensor): (b*w,C,num_patches)
         """
         BW, encoder_dim, _, _ = descriptors.size()
+        # 原图尺寸为 640 * 640，最后聚合出400个keypoints，
+        # 则以32*32的小单元格在原图上滑动，取出400个点的坐标及描述子
+        # 即：400 = 640 * 640 /( 32 * 32 )    ->  num_patch = Height * Width /( patch_size, patch_size )
         v_patches = F.unfold(self.v_coords.expand(BW, 1, self.width, self.width), kernel_size=self.patch_size,
                              stride=self.patch_size).to(self.gpuid)  # (b*w,patch_elems,num_patches)
         u_patches = F.unfold(self.u_coords.expand(BW, 1, self.width, self.width), kernel_size=self.patch_size,
@@ -43,7 +46,7 @@ class Keypoint(torch.nn.Module):
         keypoint_coords = torch.stack([expected_u, expected_v], dim=2)  # (b*w,num_patches,2)
         num_patches = keypoint_coords.size(1)
 
-        norm_keypoints2D = normalize_coords(keypoint_coords, self.width, self.width).unsqueeze(1)
+        norm_keypoints2D = normalize_coords(keypoint_coords, self.width, self.width).unsqueeze(1) # (b*w,1,num_patches,2)
 
         keypoint_desc = F.grid_sample(descriptors, norm_keypoints2D, mode='bilinear', align_corners=True)
         keypoint_desc = keypoint_desc.view(BW, encoder_dim, num_patches)  # (b*w,C,num_patches)

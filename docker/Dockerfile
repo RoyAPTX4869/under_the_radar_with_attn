@@ -7,6 +7,15 @@
 #
 FROM nvcr.io/nvidia/cuda:10.1-cudnn7-runtime
 
+
+RUN rm /etc/apt/sources.list.d/cuda.list
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+RUN apt-key del 7fa2af80
+RUN apt-get update && apt-get install -y --no-install-recommends wget
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb
+RUN dpkg -i cuda-keyring_1.0-1_all.deb
+
+
 # python
 RUN apt update
 RUN apt upgrade -y --no-install-recommends
@@ -22,7 +31,7 @@ RUN pip3 install -Iv tensorboardx==2.1 matplotlib==3.2.2 opencv-python==4.5.1.48
 RUN pip3 install numpy==1.19.4 sklearn Pillow==8.0
 
 # git and wget
-RUN apt-get udpate
+RUN apt-get update
 RUN apt install git wget -y --no-install-recommends
 
 # cmake
@@ -32,7 +41,8 @@ RUN apt install -y cmake
 
 # boost
 RUN cd /usr/src && \
- wget --no-verbose https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz && \
+# wget --no-verbose https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz && \
+ wget --no-verbose https://github.com/boostorg/boost/archive/refs/tags/boost-1.76.0.tar.gz && \
  tar xzf boost_1_76_0.tar.gz && \
  cd boost_1_76_0 && \
  ./bootstrap.sh --with-python=$(which python3) && \

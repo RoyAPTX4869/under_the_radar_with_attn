@@ -12,6 +12,12 @@ set(DEPEND_LIBS "boost_system")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -Wno-unused-function")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
 
+# set Steam path
+include_directories("/www/rov1/cpp_packs/eigen-3.4.0/eigen-3.4.0")
+include_directories("/www/rov1/cpp_packs/lgmath/include")
+set(Steam_DIR "/www/rov1/cpp_packs/steam/build")
+include_directories("/www/rov1/cpp_packs/steam/include")
+
 # packages
 find_package(PythonInterp)
 find_package(Boost COMPONENTS
@@ -30,7 +36,7 @@ find_package(PythonLibs 3 REQUIRED)
 find_package(Steam REQUIRED)
 
 # opencv
-find_package(OpenCV 3 REQUIRED)
+find_package(OpenCV 4  REQUIRED)
 
 # boost python
 ENABLE_TESTING()

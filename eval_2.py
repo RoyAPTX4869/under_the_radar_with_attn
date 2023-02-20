@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 from datasets.oxford import get_dataloaders
-from datasets.boreas import get_dataloaders_boreas
+# from datasets.boreas import get_dataloaders_boreas
 from networks.under_the_radar import UnderTheRadar
 # from networks.hero import HERO
 from utils.utils import computeMedianError, computeKittiMetrics, save_in_yeti_format, get_T_ba, load_icra21_results
@@ -27,8 +27,8 @@ def get_folder_from_file_path(path):
 if __name__ == '__main__':
     torch.set_num_threads(8)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default='config/steam.json', type=str, help='config file path')
-    parser.add_argument('--pretrain', default=None, type=str, help='pretrain checkpoint path')
+    parser.add_argument('--config', default='config/radar_test_less.json', type=str, help='config file path')
+    parser.add_argument('--pretrain', default='models/under_the_radar_res2592.pt', type=str, help='pretrain checkpoint path')
     args = parser.parse_args()
     with open(args.config) as f:
         config = json.load(f)
@@ -36,9 +36,9 @@ if __name__ == '__main__':
     seq_nums = config['test_split']
     if config['model'] == 'UnderTheRadar':
         model = UnderTheRadar(config).to(config['gpuid'])
-    elif config['model'] == 'HERO':
-        model = HERO(config).to(config['gpuid'])
-        model.solver.sliding_flag = True
+    # elif config['model'] == 'HERO':
+    #     model = HERO(config).to(config['gpuid'])
+    #     model.solver.sliding_flag = True
     assert(args.pretrain is not None)
     checkpoint = torch.load(args.pretrain, map_location=torch.device(config['gpuid']))
     failed = False
@@ -64,9 +64,12 @@ if __name__ == '__main__':
         timestamps = []
         config['test_split'] = [seq_num]
         if config['dataset'] == 'oxford':
+            ##### when geting the full data set, use this
             _, _, test_loader = get_dataloaders(config)
-        elif config['dataset'] == 'boreas':
-            _, _, test_loader = get_dataloaders_boreas(config)
+            ##### when just getting one fold of data, use the only data as the test_data
+            # test_loader, _, _ = get_dataloaders(config)
+        # elif config['dataset'] == 'boreas':
+        #     _, _, test_loader = get_dataloaders_boreas(config)
         seq_lens = test_loader.dataset.seq_lens
         print(seq_lens)
         seq_names = test_loader.dataset.sequences
@@ -86,17 +89,17 @@ if __name__ == '__main__':
                 R_pred_ = out['R'][0].detach().cpu().numpy().squeeze()
                 t_pred_ = out['t'][0].detach().cpu().numpy().squeeze()
                 T_pred.append(get_transform2(R_pred_, t_pred_))
-            elif config['model'] == 'HERO':
-                if batchi == len(test_loader) - 1:
-                    for w in range(batch['T_21'].size(0)-1):
-                        T_gt.append(batch['T_21'][w].numpy().squeeze())
-                        T_pred.append(get_T_ba(out, a=w, b=w+1))
-                        timestamps.append(batch['t_ref'][w].numpy().squeeze())
-                else:
-                    w = 0
-                    T_gt.append(batch['T_21'][w].numpy().squeeze())
-                    T_pred.append(get_T_ba(out, a=w, b=w+1))
-                    timestamps.append(batch['t_ref'][w].numpy().squeeze())
+            # elif config['model'] == 'HERO':
+            #     if batchi == len(test_loader) - 1:
+            #         for w in range(batch['T_21'].size(0)-1):
+            #             T_gt.append(batch['T_21'][w].numpy().squeeze())
+            #             T_pred.append(get_T_ba(out, a=w, b=w+1))
+            #             timestamps.append(batch['t_ref'][w].numpy().squeeze())
+            #     else:
+            #         w = 0
+            #         T_gt.append(batch['T_21'][w].numpy().squeeze())
+            #         T_pred.append(get_T_ba(out, a=w, b=w+1))
+            #         timestamps.append(batch['t_ref'][w].numpy().squeeze())
             # print('T_gt:\n{}'.format(T_gt[-1]))
             # print('T_pred:\n{}'.format(T_pred[-1]))
             time_used.append(time() - ts)

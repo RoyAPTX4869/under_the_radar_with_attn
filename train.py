@@ -7,10 +7,11 @@ import numpy as np
 from datasets.oxford import get_dataloaders
 from datasets.boreas import get_dataloaders_boreas
 from networks.under_the_radar import UnderTheRadar
-from networks.hero import HERO
+# from networks.hero import HERO
 from utils.utils import get_lr
 from utils.losses import supervised_loss, unsupervised_loss
-from utils.monitor import SVDMonitor, SteamMonitor
+# from utils.monitor import SVDMonitor, SteamMonitor
+from utils.monitor import SVDMonitor
 from datasets.transforms import augmentBatch, augmentBatch2, augmentBatch3
 
 torch.backends.cudnn.benchmark = False
@@ -25,7 +26,7 @@ print(torch.version.cuda)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default='config/steam.json', type=str, help='config file path')
+    parser.add_argument('--config', default='config/radar_test_less.json', type=str, help='config file path')
     parser.add_argument('--pretrain', default=None, type=str, help='pretrain checkpoint path')
     args = parser.parse_args()
     with open(args.config) as f:
@@ -33,13 +34,13 @@ if __name__ == '__main__':
 
     if config['dataset'] == 'oxford':
         train_loader, valid_loader, _ = get_dataloaders(config)
-    elif config['dataset'] == 'boreas':
-        train_loader, valid_loader, _ = get_dataloaders_boreas(config)
+    # elif config['dataset'] == 'boreas':
+    #     train_loader, valid_loader, _ = get_dataloaders_boreas(config)
 
     if config['model'] == 'UnderTheRadar':
         model = UnderTheRadar(config).to(config['gpuid'])
-    elif config['model'] == 'HERO':
-        model = HERO(config).to(config['gpuid'])
+    # elif config['model'] == 'HERO':
+    #     model = HERO(config).to(config['gpuid'])
 
     ckpt_path = None
     if os.path.isfile(config['log_dir'] + 'latest.pt'):
@@ -52,38 +53,38 @@ if __name__ == '__main__':
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=2.5e4 / config['val_rate'], factor=0.5)
     if config['model'] == 'UnderTheRadar':
         monitor = SVDMonitor(model, valid_loader, config)
-    elif config['model'] == 'HERO':
-        monitor = SteamMonitor(model, valid_loader, config)
+    # elif config['model'] == 'HERO':
+    #     monitor = SteamMonitor(model, valid_loader, config)
     start_epoch = 0
 
-    if ckpt_path is not None:
-        try:
-            print('Loading from checkpoint: ' + ckpt_path)
-            checkpoint = torch.load(ckpt_path, map_location=torch.device(config['gpuid']))
-            model.load_state_dict(checkpoint['model_state_dict'], strict=False)
-            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-            start_epoch = checkpoint['epoch']
-            monitor.counter = checkpoint['counter']
-            print('success')
-        except Exception as e:
-            print(e)
-            print('Defaulting to legacy checkpoint style')
-            model.load_state_dict(checkpoint, strict=False)
-            print('success')
-    if not os.path.isfile(config['log_dir'] + args.config):
-        os.system('cp ' + args.config + ' ' + config['log_dir'])
+    # if ckpt_path is not None:
+    #     try:
+    #         print('Loading from checkpoint: ' + ckpt_path)
+    #         checkpoint = torch.load(ckpt_path, map_location=torch.device(config['gpuid']))
+    #         model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+    #         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    #         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+    #         start_epoch = checkpoint['epoch']
+    #         monitor.counter = checkpoint['counter']
+    #         print('success')
+    #     except Exception as e:
+    #         print(e)
+    #         print('Defaulting to legacy checkpoint style')
+    #         model.load_state_dict(checkpoint, strict=False)
+    #         print('success')
+    # if not os.path.isfile(config['log_dir'] + args.config):
+    #     os.system('cp ' + args.config + ' ' + config['log_dir'])
 
     model.train()
 
     for epoch in range(start_epoch, config['max_epochs']):
         for batchi, batch in enumerate(train_loader):
             if config['augmentation']['rot_max'] != 0:
-                if config['dataset'] == 'boreas':
-                    batch = augmentBatch2(batch, config)
-                elif config['dataset'] == 'oxford' and config['model'] == 'HERO':
-                    batch = augmentBatch3(batch, config)
-                elif config['dataset'] == 'oxford' and config['model'] == 'UnderTheRadar':
+                # if config['dataset'] == 'boreas':
+                #     batch = augmentBatch2(batch, config)
+                # elif config['dataset'] == 'oxford' and config['model'] == 'HERO':
+                #     batch = augmentBatch3(batch, config)
+                if config['dataset'] == 'oxford' and config['model'] == 'UnderTheRadar':
                     batch = augmentBatch(batch, config)
             optimizer.zero_grad()
             try:
@@ -94,8 +95,8 @@ if __name__ == '__main__':
                 continue
             if config['model'] == 'UnderTheRadar':
                 loss, dict_loss = supervised_loss(out['R'], out['t'], batch, config)
-            elif config['model'] == 'HERO':
-                loss, dict_loss = unsupervised_loss(out, batch, config, model.solver)
+            # elif config['model'] == 'HERO':
+            #     loss, dict_loss = unsupervised_loss(out, batch, config, model.solver)
             if loss == 0:
                 print("No movement predicted. Skipping mini-batch.")
                 continue

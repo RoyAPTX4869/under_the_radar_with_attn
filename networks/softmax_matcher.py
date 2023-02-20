@@ -39,6 +39,9 @@ class SoftmaxMatcher(nn.Module):
         tgt_desc_dense = desc_dense[dense_inds]  # B x C x H x W
         tgt_desc_unrolled = F.normalize(tgt_desc_dense.view(B, encoder_dim, -1), dim=1)  # B x C x HW
 
+        # print(src_desc.transpose(2, 1).size())
+        # print(tgt_desc_unrolled.size())
+
         match_vals = torch.matmul(src_desc.transpose(2, 1), tgt_desc_unrolled)  # B x N x HW
         soft_match_vals = F.softmax(match_vals / self.softmax_temp, dim=2)  # B x N x HW
 

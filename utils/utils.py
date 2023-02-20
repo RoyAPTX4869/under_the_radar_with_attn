@@ -352,8 +352,7 @@ def save_in_yeti_format(T_gt, T_pred, timestamps, seq_lens, seq_names, root='./'
                 gtyaw = -1 * np.arcsin(T_gt[i][0, 1])
                 t = np.matmul(-1 * R_pred.transpose(), np.reshape(t_pred, (3, 1)))
                 T = get_inverse_tf(T_gt[i])
-                f.write('{},{},{},{},{},{},{},{}\n'.format(t[0, 0], t[1, 0], yaw, T[0, 3], T[1, 3], gtyaw,
-                                                           timestamps[i][0], timestamps[i][1]))
+                f.write('{},{},{},{},{},{}\n'.format(t[0, 0], t[1, 0], yaw, T[0, 3], T[1, 3], gtyaw,))
 
 def load_icra21_results(results_loc, seq_names, seq_lens):
     """Loads ICRA 2021 results for MC-RANSAC (Burnett et al.) on the Oxford Radar Dataset.
@@ -593,3 +592,4 @@ def undistort_pointcloud(points, point_times, t_refs, solver):
             p[j, :] = pbar[:]
         points[i] = p
     return points
+

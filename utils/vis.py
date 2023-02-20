@@ -269,7 +269,7 @@ def plot_sequences(T_gt, T_pred, seq_lens, returnTensor=True, T_icra=None, saveP
         plt.plot(x_gt, y_gt, 'k', linewidth=2.5, label='GT')
         if x_icra and y_icra:
             plt.plot(x_icra, y_icra, 'r', linewidth=2.5, label='MC-RANSAC')
-        plt.plot(x_pred, y_pred, 'b', linewidth=2.5, label='HERO')
+        plt.plot(x_pred, y_pred, 'b', linewidth=2.5, label='Under-the-radar')
         plt.xlabel('x (m)', fontsize=16)
         plt.ylabel('y (m)', fontsize=16)
         plt.legend(loc="upper left", edgecolor='k', fancybox=False)
